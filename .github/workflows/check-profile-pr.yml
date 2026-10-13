@@ -26,9 +26,10 @@ jobs:
         run: python3 -m pip install -r requirements.workflow.txt
       - name: Validate added/changed profiles (pull_request only)
         if: steps.changes.outputs.changed == 'true'
-        run: python validate_profiles.py --changed-only \
-              --base-sha ${{ github.event.pull_request.base.sha }} \
-              --head-sha ${{ github.event.pull_request.head.sha }}
+        run: |
+          python validate_profiles.py --changed-only \
+            --base-sha ${{ github.event.pull_request.base.sha }} \
+            --head-sha ${{ github.event.pull_request.head.sha }}
         working-directory: ./scripts
       - name: Validate all profiles (workflow_dispatch only)
         if: github.event_name == 'workflow_dispatch'
