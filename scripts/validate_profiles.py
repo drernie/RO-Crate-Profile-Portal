@@ -1,9 +1,7 @@
-import os
 import sys
 import argparse
 import requests
 
-from dotenv import load_dotenv
 from rocrate_validator import services
 
 from utils import (
@@ -15,13 +13,29 @@ from utils import (
 )
 
 
-def main(changed_only):
+def parse_args():
+    parser = argparse.ArgumentParser(description="Validate profile RO Crates")
+    parser.add_argument("--changed-only", action="store_true")
+    parser.add_argument("--base-sha")
+    parser.add_argument("--head-sha")
+
+    args = parser.parse_args()
+
+    if args.changed_only and (not args.base_sha or not args.head_sha):
+        parser.error("--changed-only requires both --base-sha and --head-sha")
+
+    return args
+
+
+def main():
     invalid_count = 0
     skipped_count = 0
     error_count = 0
 
-    if changed_only:
-        profile_urls = get_changed_profile_urls(os.getenv('BASE_SHA'), os.getenv('HEAD_SHA'))
+    args = parse_args()
+
+    if args.changed_only:
+        profile_urls = get_changed_profile_urls(args.base_sha, args.head_sha)
     else:
         profile_urls = get_profile_urls()
 
@@ -78,8 +92,4 @@ def main(changed_only):
         return 1
 
 if __name__ == "__main__":
-    load_dotenv()
-    parser = argparse.ArgumentParser(description="Validate profile RO Crates")
-    parser.add_argument("--changed-only", action="store_true")
-    args = parser.parse_args()
-    sys.exit(main(args.changed_only))
+    sys.exit(main())
