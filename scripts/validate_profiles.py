@@ -34,6 +34,7 @@ def main(changed_only):
         try:
             validate_url_content_type(url)
         except ValueError as e:
+            error_count += 1
             print(str(e))
 
         headers = {"Accept": "application/ld+json, application/json"}
