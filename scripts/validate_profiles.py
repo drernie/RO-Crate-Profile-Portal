@@ -3,6 +3,9 @@ import argparse
 import requests
 
 from rocrate_validator import services
+from rocrate_validator.models import ValidationResult
+from rocrate_validator.utils.io_helpers.output.console import Console
+from rocrate_validator.utils.io_helpers.output.text import TextOutputFormatter
 
 from utils import (
     get_profile_urls,
@@ -33,6 +36,8 @@ def main():
     error_count = 0
 
     args = parse_args()
+    console = Console()
+    console.register_formatter(TextOutputFormatter())
 
     if args.changed_only:
         profile_urls = get_changed_profile_urls(args.base_sha, args.head_sha)
@@ -43,7 +48,7 @@ def main():
         print(url)
         if skip_profile(url):
             skipped_count +=1
-            print("skipped")
+            print("  Profile skipped.\n")
             continue
 
         try:
@@ -69,25 +74,32 @@ def main():
 
         profiles = services.detect_profiles(settings)
         if not profiles:
-            error_msgs.append("The conformance to the profile(s) could not be verified.")
+            error_msgs.append("  The conformance to the profile(s) could not be verified.")
         for profile in profiles:
             settings["profile_identifier"] = profile.identifier
             result = services.validate(settings)
             if result.has_issues():
-                for issue in result.get_issues():
-                    error_msgs.append(f"Detected issue of severity {issue.severity.name} with check \"{issue.check.identifier}\": {issue.message}")
+                error_msgs.append(result)
 
         if error_msgs:
             invalid_count += 1
             for msg in error_msgs:
-                print(msg)
+                if isinstance(msg, ValidationResult):
+                    console.print(msg)
+                else: 
+                    print(msg)
+        else:
+            print("  Profile valid.")
+        if skip_checks:
+            print(f"  Skipped checks: {skip_checks}.")
+        print()
 
     if skipped_count != 0:
         print(f"{skipped_count} profiles skipped.")
     if invalid_count != 0:
         print(f"{invalid_count} profiles have invalid crate metadata.")
     if error_count != 0:
-        print(f"Error occured during validation for {error_count} profile(s).")
+        print(f"Error occured during validation for {error_count} profiles.")
     if invalid_count + error_count != 0:
         return 1
 
