@@ -1,4 +1,5 @@
 import os
+import sys
 import argparse
 import requests
 
@@ -36,6 +37,7 @@ def main(changed_only):
         except ValueError as e:
             error_count += 1
             print(str(e))
+            continue
 
         headers = {"Accept": "application/ld+json, application/json"}
         response = requests.get(url, headers=headers, allow_redirects=True)
@@ -68,17 +70,16 @@ def main(changed_only):
 
     if skipped_count != 0:
         print(f"{skipped_count} profiles skipped.")
-    error_message = ""
     if invalid_count != 0:
-        error_message += f"{invalid_count} profiles have invalid crate metadata.\n"
+        print(f"{invalid_count} profiles have invalid crate metadata.")
     if error_count != 0:
-        error_message += f"Error occured during validation for {error_count} profile(s).\n"
-    if error_message:
-        raise ValueError(error_message)
+        print(f"Error occured during validation for {error_count} profile(s).")
+    if invalid_count + error_count != 0:
+        return 1
 
 if __name__ == "__main__":
     load_dotenv()
     parser = argparse.ArgumentParser(description="Validate profile RO Crates")
     parser.add_argument("--changed-only", action="store_true")
     args = parser.parse_args()
-    main(args.changed_only)
+    sys.exit(main(args.changed_only))
