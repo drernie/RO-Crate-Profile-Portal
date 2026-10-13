@@ -69,7 +69,7 @@ def main(changed_only):
         print(f"{skipped_count} profiles skipped.")
     error_message = ""
     if invalid_count != 0:
-        error_message += f"{invalid_count} invalid crate metadata found.\n"
+        error_message += f"{invalid_count} profiles have invalid crate metadata.\n"
     if error_count != 0:
         error_message += f"Error occured during validation for {error_count} profile(s).\n"
     if error_message:
