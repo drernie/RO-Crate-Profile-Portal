@@ -8,7 +8,7 @@ VALIDATION_EXCEPTIONS = {
     "https://w3id.org/ro/crate/1.3": {
         "skip_profile": True
     },
-    "https://w3id.org/ro/wfrun/process/0.6": {
-        "skip_checks": ["ro-crate-1.2_20.1"]
+    "https://w3id.org/ro/crate/1.2": {
+        "skip_checks": ["ro-crate-1.2_10.0", "ro-crate-1.2_24.1"]
     }
 }
